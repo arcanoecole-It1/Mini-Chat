@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #chat {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        #messages {
+        flex-grow: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 20px;
+            max-width: 70%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .sent {
+            background-color: #dcf8c6;
+            align-self: flex-end;
+        }
+        .received {
+            background-color: #e5e5ea;
+            align-self: flex-start;
+        }
+        #form {
+            display: flex;
+            padding: 10px;
+            background-color: #f0f0f0;
+        }
+        #input {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            margin-right: 10px;
+        }
+        #send {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        #send:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat">
+        <div id="messages"></div>
+        <form id="form" action="">
+            <input id="input" autocomplete="off" placeholder="Type your message..." />
+            <button id="send">Send</button>
+        </form>
+    </div>
+</body>
+</html>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    var form = document.getElementById('form');
+    var input =  document.getElementById('input');
+    var messages = document.getElementById('messages');
+    var lastMessage = '';
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        if (input.value) {
+            lastMessage = input.value;
+            socket.emit('chat message', input.value);
+
+            let sentMessage = document.createElement('div');
+            sentMessage.className = 'message sent';
+            sentMessage.textContent = input.value;
+            messages.appendChild(sentMessage);
+            messages.scrollTop = messages.scrollHeight;
+            input.value = '';
+        }
+    })
+    socket.on('chat message',  function(msg) {
+        if (lastMessage !== msg) {
+            let receiveMessage = document.createElement('div');
+            receiveMessage.className = 'message received';
+            receiveMessage.textContent = msg;
+            messages.appendChild(receiveMessage);
+            messages.scrollTop = messages.scrollHeight;
+        }
+    })
+</script>
